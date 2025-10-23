@@ -4,7 +4,6 @@ const API_KEY = process.env.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY; // Add your API k
 
 // Using high-quality exchange rate APIs (similar to what Google uses)
 const PRIMARY_API_URL = 'https://api.exchangerate-api.com/v4/latest/USD'; // High-quality free API
-const SECONDARY_API_URL = 'https://api.fixer.io/latest?access_key=YOUR_FIXER_API_KEY'; // Premium option
 const FALLBACK_API_URL = 'https://v6.exchangerate-api.com/v6'; // Your current API as fallback
 
 export async function getExchangeRates() {
@@ -30,7 +29,7 @@ export async function getExchangeRates() {
     ngnBasedRates.NGN = 1;
 
     return ngnBasedRates;
-  } catch (error) {
+  } catch {
     console.log('Alternative API failed, trying fallback API...');
 
     // Fallback to your current API

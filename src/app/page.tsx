@@ -19,15 +19,17 @@ export default function Home() {
     };
     fetchRates();
 
-    // Check for saved theme
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDark(savedTheme === 'dark' || (!savedTheme && prefersDark));
-
     // Set up interval to refresh rates every 1 minute (60000 ms)
     const interval = setInterval(fetchRates, 60000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Check for saved theme
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDark(savedTheme === 'dark' || (!savedTheme && prefersDark));
   }, []);
 
   const currencies = [
