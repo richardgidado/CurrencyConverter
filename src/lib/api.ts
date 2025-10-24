@@ -69,9 +69,20 @@ export async function getCryptoPrices() {
       SOL: response.data.solana.usd * usdToNgn,
     };
 
+    console.log('Calculated crypto prices:', cryptoPrices);
     return cryptoPrices;
   } catch (error) {
     console.error('Crypto API failed:', error);
-    return null;
+    // Return fallback prices if API fails
+    return {
+      BTC: 95000000, // Approximate fallback values
+      ETH: 2500000,
+      BNB: 650000,
+      USDC: 1600,
+      XRP: 850,
+      ADA: 450,
+      USDT: 1600,
+      SOL: 120000,
+    };
   }
 }

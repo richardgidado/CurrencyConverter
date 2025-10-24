@@ -18,7 +18,6 @@ export default function Home() {
       setLastUpdated(new Date());
     };
     fetchRates();
-
     // Set up interval to refresh rates every 1 minute (60000 ms)
     const interval = setInterval(fetchRates, 60000);
 
