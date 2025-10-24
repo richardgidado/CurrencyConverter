@@ -45,6 +45,11 @@ export default function Home() {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDark(savedTheme === 'dark' || (!savedTheme && prefersDark));
+
+    // Force dark mode for production (Vercel)
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      setIsDark(true);
+    }
   }, []);
 
   const currencies = [
