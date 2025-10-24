@@ -7,17 +7,35 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    // Initialize theme
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    const isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const isDarkMode = savedTheme === 'dark' || (!savedTheme && prefersDark.matches);
     setIsDark(isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
+
+    // Apply theme and listen for system changes
+    const applyTheme = (dark: boolean) => {
+      if (dark) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    };
+    applyTheme(isDarkMode);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem('theme')) {
+        setIsDark(e.matches);
+      }
+    };
+    prefersDark.addEventListener('change', handleChange);
+    return () => prefersDark.removeEventListener('change', handleChange);
   }, []);
 
   useEffect(() => {
+    // Update theme when isDark changes
     if (isDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');

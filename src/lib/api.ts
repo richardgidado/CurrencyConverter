@@ -6,6 +6,9 @@ const API_KEY = process.env.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY; // Add your API k
 const PRIMARY_API_URL = 'https://api.exchangerate-api.com/v4/latest/USD'; // High-quality free API
 const FALLBACK_API_URL = 'https://v6.exchangerate-api.com/v6'; // Your current API as fallback
 
+// Crypto API - CoinGecko free API
+const CRYPTO_API_URL = 'https://api.coingecko.com/api/v3/simple/price';
+
 export async function getExchangeRates() {
   console.log('Fetching exchange rates...');
 
@@ -41,5 +44,34 @@ export async function getExchangeRates() {
       console.error('Both APIs failed:', fallbackError);
       return null;
     }
+  }
+}
+
+export async function getCryptoPrices() {
+  console.log('Fetching crypto prices...');
+
+  try {
+    const response = await axios.get(`${CRYPTO_API_URL}?ids=bitcoin,ethereum,binancecoin,usd-coin,ripple,cardano,tether,solana&vs_currencies=usd`);
+    console.log('Crypto API response:', response.data);
+
+    // Convert to NGN using current USD to NGN rate
+    const usdToNgnResponse = await axios.get(PRIMARY_API_URL);
+    const usdToNgn = usdToNgnResponse.data.rates.NGN;
+
+    const cryptoPrices: { [key: string]: number } = {
+      BTC: response.data.bitcoin.usd * usdToNgn,
+      ETH: response.data.ethereum.usd * usdToNgn,
+      BNB: response.data.binancecoin.usd * usdToNgn,
+      USDC: response.data['usd-coin'].usd * usdToNgn,
+      XRP: response.data.ripple.usd * usdToNgn,
+      ADA: response.data.cardano.usd * usdToNgn,
+      USDT: response.data.tether.usd * usdToNgn,
+      SOL: response.data.solana.usd * usdToNgn,
+    };
+
+    return cryptoPrices;
+  } catch (error) {
+    console.error('Crypto API failed:', error);
+    return null;
   }
 }
