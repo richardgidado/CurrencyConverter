@@ -52,8 +52,8 @@ export default function Home() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDark(savedTheme === 'dark' || (!savedTheme && prefersDark));
 
-    // Force dark mode for production (Vercel)
-    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    // Force dark mode for production (Vercel) and Windows
+    if (typeof window !== 'undefined' && (window.location.hostname !== 'localhost' || navigator.platform.includes('Win'))) {
       setIsDark(true);
     }
   }, []);
@@ -66,6 +66,7 @@ export default function Home() {
     { code: 'GHS', country: 'Ghana', flagUrl: '/flags/gh.svg' },
     { code: 'CAD', country: 'Canada', flagUrl: '/flags/ca.svg' },
     { code: 'ZAR', country: 'South Africa', flagUrl: '/flags/za.svg' },
+    { code: 'JPY', country: 'Japan', flagUrl: '/flags/jp.svg' },
   ];
 
   const cryptos = [
@@ -94,7 +95,7 @@ export default function Home() {
           </div>
           <button
             onClick={scrollToCalculator}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
           >
             Calculate to ₦
           </button>
