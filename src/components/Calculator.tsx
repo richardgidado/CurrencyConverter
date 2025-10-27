@@ -39,7 +39,7 @@ export default function Calculator({ rates, cryptoPrices }: CalculatorProps) {
     >
       <h2 className="text-xl font-bold mb-6 text-gray-800 dark:text-gray-200 flex items-center gap-2">
         <span className="text-2xl">🧮</span>
-        Calculator
+        Calculate crypto & currency to Naira
       </h2>
       <div className="space-y-6">
         <div>

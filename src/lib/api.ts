@@ -2,22 +2,20 @@ import axios from 'axios';
 
 const API_KEY = process.env.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY; // Add your API key in .env.local
 
-// Using high-quality exchange rate APIs (similar to what Google uses)
-const PRIMARY_API_URL = 'https://api.exchangerate-api.com/v4/latest/USD'; // High-quality free API
-const FALLBACK_API_URL = 'https://v6.exchangerate-api.com/v6'; // Your current API as fallback
-
-// Crypto API - CoinGecko free API
-const CRYPTO_API_URL = 'https://api.coingecko.com/api/v3/simple/price';
+// Using reliable, accurate APIs for real-time data
+const EXCHANGE_RATE_API_URL = 'https://api.exchangerate-api.com/v4/latest/USD'; // Reliable free exchange rate API
+const CRYPTO_API_URL = 'https://api.coingecko.com/api/v3/simple/price'; // CoinGecko for accurate crypto prices
+const ALTERNATIVE_CRYPTO_API = 'https://api.coinpaprika.com/v1/tickers'; // Alternative crypto API as backup
 
 export async function getExchangeRates() {
   console.log('Fetching exchange rates...');
 
-  // Try Google Finance API first (through a proxy or direct access)
   try {
-    console.log('Trying Google Finance API...');
-    // Google Finance doesn't have a direct REST API, so we'll use a reliable alternative
-    const response = await axios.get(`${PRIMARY_API_URL}`);
-    console.log('Alternative API response:', response.data);
+    // Use a more reliable API endpoint
+    const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD', {
+      timeout: 10000 // 10 second timeout
+    });
+    console.log('Exchange rate API response:', response.data);
 
     // Convert USD-based rates to NGN-based rates
     const usdToNgn = response.data.rates.NGN;
@@ -31,17 +29,21 @@ export async function getExchangeRates() {
     // Ensure NGN is 1
     ngnBasedRates.NGN = 1;
 
+    console.log('Calculated NGN-based rates:', ngnBasedRates);
     return ngnBasedRates;
-  } catch {
-    console.log('Alternative API failed, trying fallback API...');
+  } catch (error) {
+    console.error('Exchange rate API failed:', error);
 
-    // Fallback to your current API
+    // Fallback to a different API
     try {
-      const response = await axios.get(`${FALLBACK_API_URL}/${API_KEY}/latest/NGN`);
-      console.log('Fallback API response:', response.data);
-      return response.data.conversion_rates;
+      console.log('Trying fallback API...');
+      const fallbackResponse = await axios.get(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/NGN`, {
+        timeout: 10000
+      });
+      console.log('Fallback API response:', fallbackResponse.data);
+      return fallbackResponse.data.conversion_rates;
     } catch (fallbackError) {
-      console.error('Both APIs failed:', fallbackError);
+      console.error('Fallback API also failed:', fallbackError);
       return null;
     }
   }
@@ -51,12 +53,18 @@ export async function getCryptoPrices() {
   console.log('Fetching crypto prices...');
 
   try {
-    const response = await axios.get(`${CRYPTO_API_URL}?ids=bitcoin,ethereum,binancecoin,usd-coin,ripple,cardano,tether,solana&vs_currencies=usd`);
-    console.log('Crypto API response:', response.data);
+    // Use CoinGecko API with proper timeout
+    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,usd-coin,ripple,cardano,tether,solana,pi-network&vs_currencies=usd', {
+      timeout: 10000 // 10 second timeout
+    });
+    console.log('CoinGecko API response:', response.data);
 
-    // Convert to NGN using current USD to NGN rate
-    const usdToNgnResponse = await axios.get(PRIMARY_API_URL);
+    // Get current USD to NGN rate for conversion
+    const usdToNgnResponse = await axios.get('https://api.exchangerate-api.com/v4/latest/USD', {
+      timeout: 10000
+    });
     const usdToNgn = usdToNgnResponse.data.rates.NGN;
+    console.log('Current USD to NGN rate:', usdToNgn);
 
     const cryptoPrices: { [key: string]: number } = {
       BTC: response.data.bitcoin.usd * usdToNgn,
@@ -67,22 +75,13 @@ export async function getCryptoPrices() {
       ADA: response.data.cardano.usd * usdToNgn,
       USDT: response.data.tether.usd * usdToNgn,
       SOL: response.data.solana.usd * usdToNgn,
+      PI: response.data['pi-network'].usd * usdToNgn,
     };
 
-    console.log('Calculated crypto prices:', cryptoPrices);
+    console.log('Calculated crypto prices in NGN:', cryptoPrices);
     return cryptoPrices;
   } catch (error) {
-    console.error('Crypto API failed:', error);
-    // Return fallback prices if API fails
-    return {
-      BTC: 95000000, // Approximate fallback values
-      ETH: 2500000,
-      BNB: 650000,
-      USDC: 1600,
-      XRP: 850,
-      ADA: 450,
-      USDT: 1600,
-      SOL: 120000,
-    };
+    console.error('CoinGecko API failed:', error);
+    return null;
   }
 }

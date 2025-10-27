@@ -11,6 +11,13 @@ export default function Home() {
   const [isDark, setIsDark] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
+  const scrollToCalculator = () => {
+    const calculatorSection = document.getElementById('calculator');
+    if (calculatorSection) {
+      calculatorSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const fetchRates = async () => {
       const fetchedRates = await getExchangeRates();
@@ -33,8 +40,8 @@ export default function Home() {
     };
     fetchCryptoPrices();
 
-    // Refresh crypto prices every 30 seconds
-    const cryptoInterval = setInterval(fetchCryptoPrices, 30000);
+    // Refresh crypto prices every 1 minute (60 seconds)
+    const cryptoInterval = setInterval(fetchCryptoPrices, 60000);
 
     return () => clearInterval(cryptoInterval);
   }, [rates]);
@@ -70,13 +77,14 @@ export default function Home() {
     { code: 'ADA', name: 'Cardano', logoUrl: '/crypto/ada.svg' },
     { code: 'USDT', name: 'Tether', logoUrl: '/crypto/usdt.svg' },
     { code: 'SOL', name: 'Solana', logoUrl: '/crypto/sol.svg' },
+    { code: 'PI', name: 'Pi Network', logoUrl: '/crypto/piimage.png' },
   ];
 
   return (
     <main className={`min-h-screen p-4 sm:p-8 ${isDark ? 'bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-gradient-to-br from-blue-50 to-indigo-100'}`}>
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-center">
+        <div className="flex flex-col items-center mb-8">
+          <div className="text-center mb-4">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-green-500 bg-clip-text text-transparent mb-2">
               ₦ Currency & Crypto Hub
             </h1>
@@ -84,6 +92,12 @@ export default function Home() {
               Real-time exchange rates & cryptocurrency prices in Nigerian Naira
             </p>
           </div>
+          <button
+            onClick={scrollToCalculator}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            Calculate to ₦
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -96,7 +110,7 @@ export default function Home() {
               </span>
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {rates &&
+              {rates ? (
                 currencies.map(({ code, country, flagUrl }) => (
                   <CurrencyCard
                     key={code}
@@ -105,18 +119,23 @@ export default function Home() {
                     country={country}
                     flagUrl={flagUrl}
                   />
-                ))}
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400">Loading exchange rates...</p>
+                </div>
+              )}
             </div>
 
             {/* Crypto Prices Section */}
             <h1 className="text-2xl font-semibold mb-6 mt-12 text-gray-500 dark:text-gray-600">
               Crypto Prices
               <span className="block text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Updates every 30 seconds
+                Updates every minute
               </span>
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {cryptoPrices &&
+              {cryptoPrices ? (
                 cryptos.map(({ code, name, logoUrl }) => (
                   <CurrencyCard
                     key={code}
@@ -126,12 +145,17 @@ export default function Home() {
                     isCrypto={true}
                     logoUrl={logoUrl}
                   />
-                ))}
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400">Loading crypto prices...</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Calculator Section */}
-          <div className="lg:col-span-1">
+          <div id="calculator" className="lg:col-span-1">
             <h1 className="text-2xl font-semibold mb-6 text-gray-500 dark:text-gray-600">
               Currency Calculator
             </h1>
