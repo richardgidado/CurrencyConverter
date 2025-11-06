@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getExchangeRates, getCryptoPrices } from '@/lib/api';
 import CurrencyCard from '@/components/CurrencyCard';
 import Calculator from '@/components/Calculator';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function Home() {
   const [rates, setRates] = useState<{ [key: string]: number } | null>(null);
@@ -122,8 +123,8 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-400">Loading exchange rates...</p>
+                <div className="col-span-full">
+                  <LoadingSpinner />
                 </div>
               )}
             </div>
@@ -148,8 +149,8 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500 dark:text-gray-400">Loading crypto prices...</p>
+                <div className="col-span-full">
+                  <LoadingSpinner />
                 </div>
               )}
             </div>
