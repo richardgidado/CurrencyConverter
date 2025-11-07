@@ -1,16 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getExchangeRates, getCryptoPrices } from '@/lib/api';
+import { useExchangeRates, useCryptoPrices } from '@/hooks';
 import CurrencyCard from '@/components/CurrencyCard';
 import Calculator from '@/components/Calculator';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const [rates, setRates] = useState<{ [key: string]: number } | null>(null);
-  const [cryptoPrices, setCryptoPrices] = useState<{ [key: string]: number } | null>(null);
   const [isDark, setIsDark] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const scrollToCalculator = () => {
     const calculatorSection = document.getElementById('calculator');
@@ -19,33 +16,19 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    const fetchRates = async () => {
-      const fetchedRates = await getExchangeRates();
-      setRates(fetchedRates);
-      setLastUpdated(new Date());
-    };
-    fetchRates();
-    // Set up interval to refresh rates every 1 minute (60000 ms)
-    const interval = setInterval(fetchRates, 60000);
+  // Use custom hooks for cleaner code
+  const {
+    data: rates,
+    isLoading: ratesLoading,
+    error: ratesError,
+    dataUpdatedAt: ratesUpdatedAt
+  } = useExchangeRates();
 
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const fetchCryptoPrices = async () => {
-      if (rates) {
-        const prices = await getCryptoPrices();
-        setCryptoPrices(prices);
-      }
-    };
-    fetchCryptoPrices();
-
-    // Refresh crypto prices every 1 minute (60 seconds)
-    const cryptoInterval = setInterval(fetchCryptoPrices, 60000);
-
-    return () => clearInterval(cryptoInterval);
-  }, [rates]);
+  const {
+    data: cryptoPrices,
+    isLoading: cryptoLoading,
+    error: cryptoError
+  } = useCryptoPrices();
 
   useEffect(() => {
     // Check for saved theme
@@ -58,6 +41,8 @@ export default function Home() {
       setIsDark(true);
     }
   }, []);
+
+  const lastUpdated = ratesUpdatedAt ? new Date(ratesUpdatedAt) : new Date();
 
   const currencies = [
     { code: 'USD', country: 'United States', flagUrl: '/flags/us.svg' },
@@ -112,7 +97,21 @@ export default function Home() {
               </span>
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {rates ? (
+              {ratesLoading ? (
+                <div className="col-span-full">
+                  <LoadingSpinner />
+                </div>
+              ) : ratesError ? (
+                <div className="col-span-full text-center text-red-500">
+                  <p>Error loading exchange rates</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : rates ? (
                 currencies.map(({ code, country, flagUrl }) => (
                   <CurrencyCard
                     key={code}
@@ -123,8 +122,8 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full">
-                  <LoadingSpinner />
+                <div className="col-span-full text-center text-gray-500">
+                  No data available
                 </div>
               )}
             </div>
@@ -137,7 +136,21 @@ export default function Home() {
               </span>
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {cryptoPrices ? (
+              {cryptoLoading ? (
+                <div className="col-span-full">
+                  <LoadingSpinner />
+                </div>
+              ) : cryptoError ? (
+                <div className="col-span-full text-center text-red-500">
+                  <p>Error loading crypto prices</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : cryptoPrices ? (
                 cryptos.map(({ code, name, logoUrl }) => (
                   <CurrencyCard
                     key={code}
@@ -149,8 +162,8 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="col-span-full">
-                  <LoadingSpinner />
+                <div className="col-span-full text-center text-gray-500">
+                  No data available
                 </div>
               )}
             </div>
