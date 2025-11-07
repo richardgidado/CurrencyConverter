@@ -31,10 +31,10 @@ export default function CurrencyCard({ currency, rate, country, isCrypto = false
       </div>
       <div className="space-y-2">
         <p className="text-2xl font-bold text-green-600 dark:text-green-400 break-all">
-          ₦{isCrypto ? rate.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (1 / rate).toFixed(2)}
+          ₦{rate ? (isCrypto ? rate.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (1 / rate).toFixed(2)) : '--'}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          1 {currency} = ₦{isCrypto ? rate.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (1 / rate).toFixed(2)}
+          1 {currency} = ₦{rate ? (isCrypto ? rate.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (1 / rate).toFixed(2)) : '--'}
         </p>
       </div>
     </motion.div>

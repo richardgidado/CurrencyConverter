@@ -86,11 +86,19 @@ export default function Calculator({ rates, cryptoPrices }: CalculatorProps) {
             className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           >
             {isCrypto
-              ? ['BTC', 'ETH', 'BNB', 'USDC', 'XRP', 'ADA', 'USDT', 'SOL', 'PI'].map((curr) => (
-                  <option key={curr} value={curr}>
-                    {curr}
-                  </option>
-                ))
+              ? (cryptoPrices
+                  ? Object.keys(cryptoPrices).map((curr) => (
+                      <option key={curr} value={curr}>
+                        {curr}
+                      </option>
+                    ))
+                  : // Fallback to supported coins if cryptoPrices is not available yet
+                    ['BTC', 'ETH', 'BNB', 'USDC', 'XRP', 'ADA', 'USDT', 'SOL'].map((curr) => (
+                      <option key={curr} value={curr}>
+                        {curr}
+                      </option>
+                    ))
+                )
               : ['USD', 'GBP', 'CNY', 'AED', 'GHS', 'CAD', 'ZAR', 'JPY'].map((curr) => (
                   <option key={curr} value={curr}>
                     {curr}
